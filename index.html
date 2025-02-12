@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWM OFFICIAL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 5px 0 20px;
+            font-size: 14px;
+            color: #363cff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form label {
+            margin: 10px 0 5px;
+            text-align: left;
+        }
+
+        form input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AWM OFFICIAL</h1>
+            <p>HADI ANHAF AIMAN</p>
+        </header>
+        <main>
+            <form id="userForm">
+                <label for="username">USERNAME:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="userkey">USER-KEY:</label>
+                <input type="text" id="userkey" name="userkey" required>
+
+                <label for="active">ACTIVE:</label>
+                <input type="date" id="active" name="active" required>
+
+                <label for="expire">EXPIRE:</label>
+                <input type="number" id="expire" name="expire" min="1" max="30" required>
+
+                <button type="submit">APPROVE</button>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('userForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('username').value;
+            const token = document.getElementById('userkey').value;
+            const active = document.getElementById('active').value;
+            const expire = document.getElementById('expire').value;
+            const formattedActive = formatDate(active);
+            const newContent = `USERKEY=${token}=USERNAME=${name}=START=${formattedActive}=EXPIRE=${expire}=LIVE`;
+            appendToGitHubFile(newContent);
+        });
+        function formatDate(date) {
+            const [year, month, day] = date.split('-');
+            return `${day}-${month}-${year}`;
+        }
+        async function appendToGitHubFile(newContent) {
+            const githubUsername = 'XAIVER-3X';
+            const repoName = 'API';
+            const filePath = 'verify.txt';
+            const token = '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';
+            try {
+                const fileResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${repoName}/contents/${filePath}`, {
+                    headers: {
+                        'Authorization': `token ${token}`
+                    }
+                });
+                if (!fileResponse.ok) {
+                    throw new Error('INFO FETCH FAILED !!');
+                }
+                const fileData = await fileResponse.json();
+                const currentSha = fileData.sha;
+                const currentContent = atob(fileData.content);
+                const updatedContent = `${currentContent}\n${newContent}`;
+                const encodedContent = btoa(updatedContent);
+                const updateResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${repoName}/contents/${filePath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Append new entry',
+                        content: encodedContent,
+                        sha: currentSha
+                    })
+                });
+                const updateData = await updateResponse.json();
+                if (updateData.commit) {
+                    alert('APPROVE DONE √');
+                } else {
+                    alert('SOMETHING WRONG !');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('SOMETHING WENT WRONG !');
+            }
+        }
+    </script>
+</body>
+</html>
